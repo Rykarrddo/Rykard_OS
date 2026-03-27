@@ -109,6 +109,7 @@ import MainLayout from '../layouts/MainLayout.astro';
   }
   animate();
 
+<<<<<<< HEAD
   // Ajuste de Ventana
   window.addEventListener('resize', () => {
     camera.aspect = window.innerWidth / window.innerHeight;
@@ -116,6 +117,14 @@ import MainLayout from '../layouts/MainLayout.astro';
     renderer.setSize(window.innerWidth, window.innerHeight);
   });
 </script>
+=======
+        new GLTFLoader().load('/assets/Remains.glb', (gltf) => {
+            const model = gltf.scene;
+            const box = new THREE.Box3().setFromObject(model);
+            model.position.sub(box.getCenter(new THREE.Vector3()));
+            modelGroup.add(model);
+            model.traverse(n => { if(n.isMesh) { n.material.transparent = true; n.material.opacity = 1; } });
+>>>>>>> ac437db (Sincronizando nombres de archivos y rutas: Remains.glb)
 
 <style>
   .portal-root {
