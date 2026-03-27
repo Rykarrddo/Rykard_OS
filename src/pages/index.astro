@@ -1,609 +1,415 @@
 ---
-
 import '@fontsource/space-grotesk/300.css';
-
 import '@fontsource/inter/300.css';
-
 ---
 
-
-
 <html lang="es">
-
 <head>
-
     <meta charset="utf-8" />
-
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
     <title>RYKARD // ARCHIVE_OS</title>
-
     <style is:global>
-
         :root {
-
-            --dark-bg: #030505;
-
-            --tech-green: #1aed9c;
-
-            --tech-glow: rgba(26, 237, 156, 0.4);
-
+            --dark-bg: #000202; /* Negro más profundo para que resalte el brillo */
+            --tech-green: #00ff9f; /* Verde neón más puro para el Bloom */
             --antique-gold: #c5a059;
-
-            --gold-glow: rgba(197, 160, 89, 0.3);
-
             --font-main: 'Space Grotesk', sans-serif;
-
         }
 
-
-
-        html, body { margin: 0; padding: 0; background-color: var(--dark-bg); color: white; font-family: 'Inter', sans-serif; overflow-x: hidden; }
-
+        /* Busca esto y reemplázalo */
+html, body { 
+    margin: 0; padding: 0; 
+    
+    
+    
+    background-image: url('./bosque-fondo.jpg'); 
+    
+    /* Configuraciones para que la imagen cubra todo y no se repita */
+    background-size: cover; 
+    background-position: center center;
+    background-attachment: fixed; /* Mantiene el fondo quieto al scrollear */
+    background-repeat: no-repeat;
+    
+    color: white; 
+    font-family: 'Inter', sans-serif; 
+    overflow-x: hidden; 
+    -webkit-overflow-scrolling: touch; 
+}
         
-
-        #vanta-background { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: 0; opacity: 0.3; }
-
-        #canvas-container { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: 1; pointer-events: none; }
-
-        .film-grain { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: url('https://grainy-gradients.vercel.app/noise.svg'); opacity: 0.04; pointer-events: none; z-index: 5; }
-
-
-
-        .scroll-wrapper { position: relative; z-index: 2; width: 100%; }
-
+        /* Contenedor principal de Three.js (Fondo + Esqueleto) */
+        #canvas-container { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: 1; }
         
+        .film-grain { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: url('https://grainy-gradients.vercel.app/noise.svg'); opacity: 0.03; pointer-events: none; z-index: 5; }
 
-        .hero-spacer { 
-
-            height: 160vh; 
-
-            display: flex; 
-
-            flex-direction: column; 
-
-            align-items: center; 
-
-            justify-content: flex-start; 
-
-            padding-top: 10vh; 
-
-            position: relative; 
-
-            /* Perspectiva clave para el efecto 3D */
-
-            perspective: 1200px;
-
-        }
-
-
+        .scroll-wrapper { position: relative; z-index: 2; width: 100%; pointer-events: none; }
+        
+        .hero-spacer { height: 180vh; display: flex; flex-direction: column; align-items: center; padding-top: 15vh; position: relative; perspective: 1200px; }
 
         .main-title {
-
-            font-family: var(--font-main); font-size: 0.8rem; letter-spacing: 25px; text-transform: uppercase; color: var(--antique-gold); text-align: center; border-bottom: 1px solid rgba(197, 160, 89, 0.1); padding-bottom: 25px;
-
-            text-shadow: 0 0 15px var(--gold-glow);
-
-            z-index: 10;
-
+            font-family: var(--font-main); font-size: clamp(0.6rem, 4vw, 0.9rem); letter-spacing: clamp(10px, 5vw, 25px); text-transform: uppercase; color: var(--antique-gold); text-align: center; border-bottom: 1px solid rgba(197, 160, 89, 0.1); padding-bottom: 25px; z-index: 10; width: 90%; pointer-events: auto;
         }
 
-
-
-        /* Contenedor magnético con soporte 3D */
-
-        .js-magnetic {
-
-            transform-style: preserve-3d;
-
-            will-change: transform;
-
-        }
-
-
+        .js-magnetic { transform-style: preserve-3d; will-change: transform; pointer-events: auto; }
 
         .floating-card {
-
-            position: absolute;
-
-            width: 250px;
-
-            padding: 2.5rem 2rem;
-
-            background: linear-gradient(165deg, rgba(255,255,255,0.03) 0%, rgba(0,0,0,0.8) 100%);
-
-            backdrop-filter: blur(15px);
-
-            border: 1px solid rgba(197, 160, 89, 0.2);
-
-            border-radius: 4px;
-
-            box-shadow: 0 20px 50px rgba(0,0,0,0.5);
-
-            font-family: var(--font-main);
-
-            pointer-events: all;
-
+            position: absolute; width: clamp(220px, 70vw, 280px); padding: 2rem; background: rgba(0, 0, 0, 0.85); backdrop-filter: blur(15px); border: 1px solid rgba(197, 160, 89, 0.2); border-radius: 4px; box-shadow: 0 20px 50px rgba(0,0,0,0.5); font-family: var(--font-main);
         }
 
-
+        @media (max-width: 768px) {
+            .floating-card.left { left: 50%; transform: translateX(-50%); top: 40vh; }
+            .floating-card.right { left: 50%; transform: translateX(-50%); top: 115vh; }
+            .cards-grid { grid-template-columns: 1fr !important; gap: 1.5rem !important;}
+        }
 
         .floating-card.left { left: 5%; top: 35vh; }
-
         .floating-card.right { right: 5%; top: 35vh; }
 
-
-
-        .fc-tag { font-size: 0.5rem; color: var(--tech-green); letter-spacing: 3px; text-transform: uppercase; margin-bottom: 1rem; display: block;}
-
+        .fc-tag { font-size: 0.5rem; color: var(--tech-green); letter-spacing: 3px; text-transform: uppercase; margin-bottom: 1rem; display: block; text-shadow: 0 0 5px var(--tech-green);}
         .fc-title { font-size: 1rem; color: #fff; text-transform: uppercase; letter-spacing: 2px; margin: 0 0 1rem 0; font-weight: 300;}
+        .fc-body { font-size: 0.8rem; color: rgba(255,255,255,0.7); line-height: 1.6; margin: 0;}
 
-        .fc-body { font-family: 'Inter', sans-serif; font-size: 0.8rem; color: rgba(255,255,255,0.7); line-height: 1.6; margin: 0;}
-
-
-
-        .cards-container { position: relative; z-index: 3; padding: 0 8% 40vh 8%; perspective: 1500px; }
-
-        .cards-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 3rem; max-width: 1400px; margin: 0 auto; transform-style: preserve-3d; }
-
-
+        .cards-container { position: relative; z-index: 3; padding: 0 8% 20vh 8%; perspective: 1500px; pointer-events: none; }
+        .cards-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 2rem; max-width: 1400px; margin: 0 auto; transform-style: preserve-3d; pointer-events: auto; }
 
         .tech-card {
-
-            background: linear-gradient(165deg, rgba(255,255,255,0.03) 0%, rgba(0,0,0,0.8) 100%);
-
-            backdrop-filter: blur(25px); -webkit-backdrop-filter: blur(25px);
-
-            border-top: 1px solid rgba(255, 255, 255, 0.1); 
-
-            border-left: 1px solid rgba(255, 255, 255, 0.1); 
-
-            border-right: 4px solid rgba(0, 0, 0, 0.5); 
-
-            border-bottom: 4px solid rgba(0, 0, 0, 0.5);
-
-            border-radius: 2px; padding: 4rem 2rem; min-height: 280px; 
-
-            display: flex; flex-direction: column; justify-content: center; align-items: center;
-
-            opacity: 0; transform: translateY(100px); 
-
-            transform-style: preserve-3d;
-
-            box-shadow: 20px 20px 50px rgba(0,0,0,0.8);
-
-            transition: border-color 0.4s ease, background 0.4s ease;
-
+            background: rgba(0, 0, 0, 0.9); backdrop-filter: blur(25px); border-top: 1px solid rgba(255, 255, 255, 0.05); border-left: 1px solid rgba(255, 255, 255, 0.05); border-radius: 2px; padding: 3rem 1.5rem; min-height: 200px; display: flex; flex-direction: column; justify-content: center; align-items: center; opacity: 0; transform: translateY(100px); transform-style: preserve-3d; box-shadow: 10px 10px 30px rgba(0,0,0,0.5); transition: border-color 0.4s ease, box-shadow 0.4s ease;
         }
 
-
-
-        .tech-card:hover {
-
+        .tech-card:hover, .tech-card:active {
             border-color: var(--tech-green);
-
-            background: rgba(26, 237, 156, 0.05);
-
-            box-shadow: 0 0 40px var(--tech-glow), 0 0 80px rgba(26, 237, 156, 0.1);
-
+            box-shadow: 0 0 30px rgba(0, 255, 159, 0.2);
+            background: rgba(0, 255, 159, 0.02);
         }
-
-
-
-        /* Capas internas para efecto Parallax dentro de la tarjeta */
 
         .inner-content { transform-style: preserve-3d; pointer-events: none; }
+        .inner-content > * { transform: translateZ(30px); }
 
-        .inner-content > * { transform: translateZ(30px); } /* El texto flota sobre la tarjeta */
-
-
-
-        .card-number { font-family: var(--font-main); font-size: 0.6rem; color: var(--antique-gold); letter-spacing: 5px; margin-bottom: 1.5rem; display: block; }
-
-        .card-title { font-family: var(--font-main); font-size: 1.2rem; text-transform: uppercase; letter-spacing: 3px; text-align: center; color: #fff; margin: 0; }
-
+        .card-number { font-family: var(--font-main); font-size: 0.6rem; color: var(--antique-gold); letter-spacing: 5px; margin-bottom: 1rem; display: block; }
+        .card-title { font-family: var(--font-main); font-size: clamp(0.8rem, 3vw, 1rem); text-transform: uppercase; letter-spacing: 3px; text-align: center; color: #fff; margin: 0; }
     </style>
-
 </head>
-
 <body>
 
-
-
     <div class="film-grain"></div>
-
-    <div id="vanta-background"></div>
-
     <div id="canvas-container"></div>
 
-
-
     <main class="scroll-wrapper">
-
         <section class="hero-spacer">
-
              <h1 class="main-title"> MEMENTO MORI // RYKARD_OS</h1>
 
-
-
-             <div class="floating-card left js-magnetic js-hero-card">
-
+             <div class="floating-card left js-magnetic">
                  <div class="inner-content">
-
-                    <span class="fc-tag">System_Status</span>
-
-                    <h3 class="fc-title">Core_Remains_Loaded</h3>
-
-                    <p class="fc-body">Visualizando estructura ósea indexada. Integridad del glTF: 100%. Render engine activo.</p>
-
+                    <span class="fc-tag">Neural_Net_Active</span>
+                    <h3 class="fc-title">Cortex_Visualizer</h3>
+                    <p class="fc-body">Estructura sináptica cargada. Nodos incandescenctes detectados.</p>
                  </div>
-
              </div>
 
-
-
-             <div class="floating-card right js-magnetic js-hero-card">
-
+             <div class="floating-card right js-magnetic">
                  <div class="inner-content">
-
                     <span class="fc-tag">Database_Nav</span>
-
-                    <h3 class="fc-title">Archive_Protocol_01</h3>
-
-                    <p class="fc-body">Haga scroll para desglosar categorías de datos. 9 nodos detectados en la red inferior.</p>
-
+                    <h3 class="fc-title">Archive_Protocol</h3>
+                    <p class="fc-body">9 índices de datos. Inicie scroll profundo.</p>
                  </div>
-
              </div>
-
         </section>
-
-
 
         <section class="cards-container">
-
             <div class="cards-grid">
-
-                {[...Array(9)].map((_, i) => (
-
+                {["ETHICA_SPINOZA", "JOULE_TRACKER", "PYTHON_CORE", "SQL_DB", "PSP_EMU", "ARCH_LINUX", "DATA_SCIENCE", "JUNG_SHADOW", "OS_CONFIG"].map((title, i) => (
                     <div class="tech-card js-magnetic js-tech-card">
-
                         <div class="inner-content">
-
                             <span class="card-number">NODE_V.0{i+1}</span>
-
-                            <h2 class="card-title">Categoría <br/> {i+1}</h2>
-
+                            <h2 class="card-title">{title}</h2>
                         </div>
-
                     </div>
-
                 ))}
-
             </div>
-
         </section>
-
     </main>
 
-
-
     <script>
-
         import * as THREE from 'three';
-
         import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader';
-
         import { gsap } from 'gsap';
-
         import { ScrollTrigger } from 'gsap/ScrollTrigger';
-
         import Lenis from '@studio-freight/lenis';
-
-        import NET from 'vanta/dist/vanta.net.min';
-
-
+        
+        // Importaciones necesarias para el efecto de brillo (Bloom)
+        import { EffectComposer } from 'three/examples/jsm/postprocessing/EffectComposer.js';
+        import { RenderPass } from 'three/examples/jsm/postprocessing/RenderPass.js';
+        import { UnrealBloomPass } from 'three/examples/jsm/postprocessing/UnrealBloomPass.js';
 
         gsap.registerPlugin(ScrollTrigger);
 
-
-
-        const vantaEffect = NET({
-
-            el: "#vanta-background", THREE, color: 0x1aed9c, backgroundColor: 0x030505,
-
-            points: 10.0, maxDistance: 20.0, spacing: 15.0
-
+        // --- ULTRA SMOOTH SCROLL (LENIS) ---
+        const lenis = new Lenis({
+            duration: 2.5, // Scroll más pesado y elegante
+            easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
+            touchMultiplier: 2,
+            infinite: false,
         });
 
+        function raf(time) {
+            lenis.raf(time);
+            requestAnimationFrame(raf);
+        }
+        requestAnimationFrame(raf);
 
-
+        // --- THREE.JS BASE SETUP ---
+        const container = document.querySelector('#canvas-container');
         const scene = new THREE.Scene();
+        // Niebla negra para dar profundidad a la red
+        scene.fog = new THREE.FogExp2(0x000202, 0.05);
 
-        const camera = new THREE.PerspectiveCamera(30, window.innerWidth/window.innerHeight, 0.1, 1000);
+        const camera = new THREE.PerspectiveCamera(35, window.innerWidth/window.innerHeight, 0.1, 1000);
+        camera.position.z = 15;
 
         const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
-
-        renderer.setSize(window.innerWidth, window.innerHeight);
-
+        renderer.setSize(container.clientWidth, container.clientHeight);
         renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+        // Necesario para que el Bloom funcione correctamente
+        renderer.outputEncoding = THREE.sRGBEncoding;
+        container.appendChild(renderer.domElement);
 
-        document.querySelector('#canvas-container').appendChild(renderer.domElement);
+        // --- POST-PROCESADO (BLOOM / BRILLO) ---
+        const renderScene = new RenderPass(scene, camera);
+        
+        // Parámetros del Bloom: (resolución, fuerza, radio, umbral)
+        // Fuerza alta (1.5) y umbral bajo (0.1) para que los nodos brillen mucho
+        const bloomPass = new UnrealBloomPass(new THREE.Vector2(window.innerWidth, window.innerHeight), 1.5, 0.4, 0.1);
+        
+        const composer = new EffectComposer(renderer);
+        composer.addPass(renderScene);
+        composer.addPass(bloomPass);
 
+        // --- LUCES PARA EL ESQUELETO ---
+        const lightGroup = new THREE.Group();
+        const light1 = new THREE.DirectionalLight(0xffd700, 2); // Oro
+        light1.position.set(5, 10, 7);
+        const light2 = new THREE.DirectionalLight(0x00ff9f, 0.5); // Toque verde lateral
+        light2.position.set(-5, -5, -5);
+        lightGroup.add(light1, light2, new THREE.AmbientLight(0xffffff, 0.2));
+        scene.add(lightGroup);
 
+        // --- RENEURAL NET (IMPLEMENTACIÓN NATIVA TIPO VANTA) ---
+        const neuralNetGroup = new THREE.Group();
+        scene.add(neuralNetGroup);
 
-        scene.add(new THREE.AmbientLight(0xffffff, 0.8));
+        const particleCount = window.innerWidth < 768 ? 40 : 80; // Menos partículas en móvil
+        const maxDistance = 3.5; // Distancia máxima para conectar
+        const particlesGeometry = new THREE.BufferGeometry();
+        const particlePositions = new Float32Array(particleCount * 3);
+        const particleVelocities = [];
 
-        const light = new THREE.DirectionalLight(0xffd700, 1.5);
-
-        light.position.set(5, 10, 7);
-
-        scene.add(light);
-
-
-
-        let modelGroup = new THREE.Group(); scene.add(modelGroup);
-
-
-
-        const camSetup = { orbitRadius: 20, orbitAngle: Math.PI * 0.2, camY: 1, modelOpacity: 1, modelY: -0.5, vantaDensity: 20.0 };
-
-
-
-        // --- PARTÍCULAS DE ORO ---
-
-        const flakeCount = 1500;
-
-        const flakeGeometry = new THREE.IcosahedronGeometry(0.04, 0); 
-
-        const goldMaterial = new THREE.MeshStandardMaterial({
-
-            color: 0xffd700, metalness: 0.5 , roughness: 0.7, emissive: 0x221100, transparent: true, opacity: 1
-
+        // Nodos: Esferas grandes e incandescentes
+        const nodeGeometry = new THREE.IcosahedronGeometry(0.08, 1); // Partícula grande
+        // Material Basic + Color puro + Bloom Pass = Incandescencia
+        const nodeMaterial = new THREE.MeshBasicMaterial({ 
+            color: 0x00ff9f, // Verde Elegante
         });
+        const nodesMesh = new THREE.InstancedMesh(nodeGeometry, nodeMaterial, particleCount);
+        nodesMesh.instanceMatrix.setUsage(THREE.DynamicDrawUsage);
+        neuralNetGroup.add(nodesMesh);
 
-        const goldInstancedMesh = new THREE.InstancedMesh(flakeGeometry, goldMaterial, flakeCount);
+        // Conexiones: Líneas finas y menos brillantes
+        const linesGeometry = new THREE.BufferGeometry();
+        // Material de línea con opacidad baja para que no opaque a los nodos
+        const linesMaterial = new THREE.LineBasicMaterial({ 
+            color: 0x00ff9f, 
+            transparent: true, 
+            opacity: 0.15, // Menos luz irradiante
+            blending: THREE.AdditiveBlending 
+        });
+        const linesMesh = new THREE.LineSegments(linesGeometry, linesMaterial);
+        neuralNetGroup.add(linesMesh);
 
+        // Inicializar posiciones y velocidades
         const dummy = new THREE.Object3D();
-
-        for (let i = 0; i < flakeCount; i++) {
-
-            dummy.position.set((Math.random()-0.5)*18, (Math.random()-0.5)*18, (Math.random()-0.5)*18);
-
-            dummy.rotation.set(Math.random()*Math.PI, Math.random()*Math.PI, Math.random()*Math.PI);
-
-            const s = Math.random()*0.8 + 0.2;
-
-            dummy.scale.set(s, s, s);
-
-            dummy.updateMatrix();
-
-            goldInstancedMesh.setMatrixAt(i, dummy.matrix);
-
+        for (let i = 0; i < particleCount; i++) {
+            particlePositions[i * 3] = (Math.random() - 0.5) * 15;
+            particlePositions[i * 3 + 1] = (Math.random() - 0.5) * 15;
+            particlePositions[i * 3 + 2] = (Math.random() - 0.5) * 10;
+            
+            particleVelocities.push(new THREE.Vector3(
+                (Math.random() - 0.5) * 0.01,
+                (Math.random() - 0.5) * 0.01,
+                (Math.random() - 0.5) * 0.01
+            ));
         }
 
-        scene.add(goldInstancedMesh);
-
-
-
-        const mouseLight = new THREE.PointLight(0xffd700, 45, 12); scene.add(mouseLight);
-
-        const mouse = new THREE.Vector2();
-
-        window.addEventListener('mousemove', (e) => {
-
-            mouse.x = (e.clientX / window.innerWidth) * 2 - 1;
-
-            mouse.y = -(e.clientY / window.innerHeight) * 2 + 1;
-
-        });
-
-
+        // --- LOAD SKELETON MODEL ---
+        let skeletonModel;
+        const modelGroup = new THREE.Group(); scene.add(modelGroup);
+        const camSetup = { orbitAngle: 0.2, orbitRadius: window.innerWidth < 768 ? 16 : 11, modelY: -0.5, netOpacity: 1 };
 
         new GLTFLoader().load('./remains.glb', (gltf) => {
+            skeletonModel = gltf.scene;
+            const box = new THREE.Box3().setFromObject(skeletonModel);
+            skeletonModel.position.sub(box.getCenter(new THREE.Vector3()));
+            modelGroup.add(skeletonModel);
 
-            const model = gltf.scene;
+            // Ajustar material del esqueleto para que NO brille con el Bloom (no emissive)
+            skeletonModel.traverse(n => {
+                if(n.isMesh) {
+                    n.material.metalness = 0.7;
+                    n.material.roughness = 0.3;
+                    n.material.envMapIntensity = 1;
+                }
+            });
 
-            const box = new THREE.Box3().setFromObject(model);
-
-            model.position.sub(box.getCenter(new THREE.Vector3()));
-
-            modelGroup.add(model);
-
-            model.traverse(n => { if(n.isMesh) { n.material.transparent = true; n.material.opacity = 1; } });
-
-
-
+            // Animaciones ScrollTrigger (Mismas que antes)
             gsap.to(camSetup, {
-
-                orbitAngle: Math.PI * 2.7, orbitRadius: 4, vantaDensity: 30.0,
-
-                scrollTrigger: { trigger: ".hero-spacer", start: "top top", end: "bottom center", scrub: 1.9}
-
+                orbitAngle: Math.PI * 2.5,
+                orbitRadius: window.innerWidth < 768 ? 7 : 5,
+                scrollTrigger: { trigger: ".hero-spacer", start: "top top", end: "bottom center", scrub: 1.5 }
             });
 
-
-
-            const tlExit = gsap.timeline({
-
-                scrollTrigger: { trigger: ".cards-grid", start: "top 95%", end: "top 40%", scrub: 1.2 }
-
+            gsap.to(modelGroup.position, {
+                y: 15, // Sube el esqueleto
+                scrollTrigger: { trigger: ".cards-grid", start: "top 95%", end: "top 40%", scrub: 1 }
             });
-
-            tlExit.to(camSetup, { modelY: 10, camY: 25, modelOpacity: 0 }, 0);
-
-            tlExit.to(".js-hero-card", { z: 500, opacity: 0, stagger: 0.1 }, 0);
-
+            
+            // Desvanecer red neuronal al bajar
+            gsap.to(camSetup, {
+                netOpacity: 0.1,
+                scrollTrigger: { trigger: ".cards-grid", start: "top 80%", end: "top 30%", scrub: 1 }
+            });
         });
 
+        // --- MOUSE & TOUCH TRACKING (Para interactuar con la red) ---
+        const pointer = new THREE.Vector2();
+        const targetPointer = new THREE.Vector2();
+        const updatePointer = (x, y) => {
+            targetPointer.x = (x / window.innerWidth) * 2 - 1;
+            targetPointer.y = -(y / window.innerHeight) * 2 + 1;
+        };
 
+        window.addEventListener('mousemove', (e) => updatePointer(e.clientX, e.clientY));
+        window.addEventListener('touchmove', (e) => updatePointer(e.touches[0].clientX, e.touches[0].clientY), { passive: true });
 
-        // --- LÓGICA DE MAGNETISMO 3D (EJE Z) ---
+        // --- MAGNETISMO UI ---
+        const handleMagneticMove = (e, el) => {
+            const rect = el.getBoundingClientRect();
+            const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+            const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+            const x = (clientX - (rect.left + rect.width / 2)) / (rect.width / 2);
+            const y = (clientY - (rect.top + rect.height / 2)) / (rect.height / 2);
+            gsap.to(el, { duration: 0.4, x: x * 25, y: y * 25, z: 60, rotateY: x * 20, rotateX: -y * 20, ease: "power2.out" });
+        };
 
-        const cards = document.querySelectorAll('.js-magnetic');
+        const resetMagnetic = (el) => {
+            gsap.to(el, { duration: 1, x: 0, y: 0, z: 0, rotateX: 0, rotateY: 0, ease: "elastic.out(1, 0.5)" });
+        };
 
-
-
-        cards.forEach(card => {
-
-            card.addEventListener('mousemove', (e) => {
-
-                const rect = card.getBoundingClientRect();
-
-                const centerX = rect.left + rect.width / 2;
-
-                const centerY = rect.top + rect.height / 2;
-
-                
-
-                // Distancia desde el centro (normalizada de -1 a 1)
-
-                const percentX = (e.clientX - centerX) / (rect.width / 2);
-
-                const percentY = (e.clientY - centerY) / (rect.height / 2);
-
-
-
-                gsap.to(card, {
-
-                    duration: 0.5,
-
-                    x: percentX * 30, // Movimiento lateral
-
-                    y: percentY * 30, // Movimiento vertical
-
-                    z: 80,            // SALTO HACIA ADELANTE (Rompe la 4ta pared)
-
-                    rotateY: percentX * 25, // Inclinación lateral
-
-                    rotateX: -percentY * 25, // Inclinación frontal/trasera
-
-                    ease: "power2.out",
-
-                    overwrite: true
-
-                });
-
-
-
-                // Efecto parallax para el contenido interno
-
-                gsap.to(card.querySelector('.inner-content'), {
-
-                    duration: 0.5,
-
-                    x: percentX * 10,
-
-                    y: percentY * 10,
-
-                    z: 40,
-
-                    ease: "power2.out"
-
-                });
-
-            });
-
-
-
-            card.addEventListener('mouseleave', () => {
-
-                gsap.to(card, {
-
-                    duration: 1.2,
-
-                    x: 0, y: 0, z: 0,
-
-                    rotateX: 0, rotateY: 0,
-
-                    ease: "elastic.out(1, 0.4)"
-
-                });
-
-                gsap.to(card.querySelector('.inner-content'), {
-
-                    duration: 1.2, x: 0, y: 0, z: 0,
-
-                    ease: "elastic.out(1, 0.4)"
-
-                });
-
-            });
-
+        document.querySelectorAll('.js-magnetic').forEach(el => {
+            el.addEventListener('mousemove', (e) => handleMagneticMove(e, el));
+            el.addEventListener('touchmove', (e) => handleMagneticMove(e, el));
+            el.addEventListener('mouseleave', () => resetMagnetic(el));
+            el.addEventListener('touchend', () => resetMagnetic(el));
         });
 
-
-
-        // Animación de entrada para el grid
-
+        // --- GRID ANIMATION ---
         gsap.to(".js-tech-card", {
-
-            opacity: 1, y: 0, stagger: 0.05, duration: 1.5, ease: "power4.out",
-
-            scrollTrigger: { trigger: ".cards-grid", start: "top 90%" }
-
+            opacity: 1, y: 0, stagger: 0.1, duration: 1.8, ease: "power3.out",
+            scrollTrigger: { trigger: ".cards-grid", start: "top 85%" }
         });
 
+        // --- LOOP DE RENDER Y ANIMACIÓN DE LA RED ---
+        const clock = new THREE.Clock();
 
+        function animate() {
+            const delta = clock.getDelta();
+            
+            // Suavizar movimiento del puntero
+            pointer.x += (targetPointer.x - pointer.x) * 0.1;
+            pointer.y += (targetPointer.y - pointer.y) * 0.1;
 
-        const lenis = new Lenis({ duration: 1.5 });
-
-        function animate(time) {
-
-            lenis.raf(time);
-
+            // 1. Mover la cámara (Mismo sistema de órbita)
             camera.position.x = Math.cos(camSetup.orbitAngle) * camSetup.orbitRadius;
-
             camera.position.z = Math.sin(camSetup.orbitAngle) * camSetup.orbitRadius;
-
-            camera.position.y = camSetup.camY + (Math.sin(time/2500) * 0.25);
-
+            camera.position.y = camSetup.modelY + 1 + (Math.sin(clock.getElapsedTime()/2) * 0.3);
             camera.lookAt(0, camSetup.modelY, 0);
 
+            // 2. Animar Red Neuronal (Posiciones, Conexiones e Interacción)
+            const linePositions = [];
+            const dummyMatrix = new THREE.Matrix4();
+            
+            // Rotación lenta de todo el grupo de la red
+            neuralNetGroup.rotation.y += 0.001;
 
+            for (let i = 0; i < particleCount; i++) {
+                // Mover partículas
+                particlePositions[i * 3] += particleVelocities[i].x;
+                particlePositions[i * 3 + 1] += particleVelocities[i].y;
+                particlePositions[i * 3 + 2] += particleVelocities[i].z;
 
-            const vector = new THREE.Vector3(mouse.x, mouse.y, 0.5);
+                // Rebotar en los bordes
+                if (Math.abs(particlePositions[i * 3]) > 7) particleVelocities[i].x *= -1;
+                if (Math.abs(particlePositions[i * 3 + 1]) > 7) particleVelocities[i].y *= -1;
+                if (Math.abs(particlePositions[i * 3 + 2]) > 5) particleVelocities[i].z *= -1;
 
-            vector.unproject(camera);
+                // Interacción con el puntero (repulsión suave)
+                const pX = particlePositions[i * 3];
+                const pY = particlePositions[i * 3 + 1];
+                // Proyectar puntero a espacio 3D aproximado
+                const mouseX3D = pointer.x * 7; 
+                const mouseY3D = pointer.y * 7;
+                
+                const dx = pX - mouseX3D;
+                const dy = pY - mouseY3D;
+                const distMouse = Math.sqrt(dx*dx + dy*dy);
+                if(distMouse < 3) {
+                    particlePositions[i * 3] += dx * 0.01;
+                    particlePositions[i * 3 + 1] += dy * 0.01;
+                }
 
-            const dir = vector.sub(camera.position).normalize();
+                // Actualizar InstancedMesh de los Nodos (Esferas)
+                dummyMatrix.setPosition(particlePositions[i * 3], particlePositions[i * 3 + 1], particlePositions[i * 3 + 2]);
+                nodesMesh.setMatrixAt(i, dummyMatrix);
 
-            const distance = -camera.position.z / dir.z;
+                // Buscar conexiones (Líneas)
+                for (let j = i + 1; j < particleCount; j++) {
+                    const dx = particlePositions[i * 3] - particlePositions[j * 3];
+                    const dy = particlePositions[i * 3 + 1] - particlePositions[j * 3 + 1];
+                    const dz = particlePositions[i * 3 + 2] - particlePositions[j * 3 + 2];
+                    const dist = Math.sqrt(dx * dx + dy * dy + dz * dz);
 
-            const pos = camera.position.clone().add(dir.multiplyScalar(distance));
+                    if (dist < maxDistance) {
+                        linePositions.push(
+                            particlePositions[i * 3], particlePositions[i * 3 + 1], particlePositions[i * 3 + 2],
+                            particlePositions[j * 3], particlePositions[j * 3 + 1], particlePositions[j * 3 + 2]
+                        );
+                    }
+                }
+            }
+            
+            nodesMesh.instanceMatrix.needsUpdate = true;
+            
+            // Actualizar geometría de líneas
+            linesMesh.geometry.setAttribute('position', new THREE.Float32BufferAttribute(linePositions, 3));
+            linesMesh.geometry.attributes.position.needsUpdate = true;
+            
+            // Aplicar opacidad de la red por scroll
+            nodeMaterial.opacity = camSetup.netOpacity;
+            linesMaterial.opacity = camSetup.netOpacity * 0.15; // Mantener líneas tenues
 
-            mouseLight.position.copy(pos);
-
-
-
-            goldInstancedMesh.rotation.y += 0.0006;
-
-            goldInstancedMesh.position.y = camSetup.modelY;
-
-            goldMaterial.opacity = camSetup.modelOpacity; 
-
-            modelGroup.position.y = camSetup.modelY;
-
-            modelGroup.traverse(n => { if(n.isMesh) n.material.opacity = camSetup.modelOpacity; });
-
-
-
-            renderer.render(scene, camera);
-
+            // 3. Renderizar con Composer (Bloom) en lugar de renderer estándar
+            composer.render();
             requestAnimationFrame(animate);
-
         }
-
+        
         requestAnimationFrame(animate);
 
-
-
+        // --- RESIZE HANDLE ---
         window.addEventListener('resize', () => {
-
-            camera.aspect = window.innerWidth / window.innerHeight; camera.updateProjectionMatrix(); renderer.setSize(window.innerWidth, window.innerHeight);
-
+            const width = window.innerWidth;
+            const height = window.innerHeight;
+            camera.aspect = width / height;
+            camera.updateProjectionMatrix();
+            renderer.setSize(width, height);
+            composer.setSize(width, height);
         });
-
     </script>
-
 </body>
-
 </html>
