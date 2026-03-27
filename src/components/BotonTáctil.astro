@@ -1,0 +1,83 @@
+kk---
+// src/components/BotonTáctil.astro
+interface Props {
+  text: string;
+  isRykard?: boolean; // Para el botón central
+}
+
+const { text, isRykard = false } = Astro.props;
+---
+
+<button class={`tactile-button ${isRykard ? 'rykard-button' : ''}`}>
+  <span>{text}</span>
+</button>
+
+<style>
+  .tactile-button {
+    grid-area: center; /* Por defecto, para el centrado */
+    border-radius: 50%;
+    cursor: pointer;
+    font-family: 'Playfair Display', serif;
+    font-size: 0.9rem;
+    color: var(--gold);
+    border: none;
+    outline: none;
+    position: relative;
+    transition: all 0.1s ease-out; /* Velocidad rápida para el clic */
+
+    /* TEXTURA DE MADERA OSCURA (CSS Puro) */
+    background-color: var(--dark-wood);
+    background-image: 
+      /* Luz cenital */
+      radial-gradient(circle at top, rgba(255, 255, 255, 0.05) 0%, rgba(0,0,0,0) 70%),
+      /* Veta de la madera simulada */
+      repeating-conic-gradient(from 180deg at 50% 50%, 
+        #0d0906 0deg 2deg, 
+        #120e0a 3deg 5deg
+      );
+    background-size: cover;
+
+    /* PROFUNDIDAD (Neomorfismo de lujo) */
+    box-shadow: 
+      /* Sombra externa inferior */
+      0 12px 20px rgba(0,0,0,0.9), 
+      /* Luz de borde superior */
+      inset 0 1px 1px rgba(255, 255, 255, 0.1),
+      /* Sombra de profundidad de la textura */
+      inset 0 20px 40px rgba(0,0,0,0.7);
+  }
+
+  /* EFECTO DE HUNDIMIENTO REAL (Mecánico) */
+  .tactile-button:active {
+    box-shadow: 
+      0 2px 4px rgba(0,0,0,0.8), /* Sombra externa reducida */
+      inset 0 8px 15px rgba(0,0,0,0.9), /* Sombra interna profunda */
+      inset 0 0px 5px rgba(212,175,55,0.05); /* Resplandor tenue */
+    transform: translate(-50%, -50%) scale(0.97) translateY(4px); /* Se encoge y baja */
+  }
+
+  /* Ajustes específicos para botones laterales */
+  :not(.rykard-button).tactile-button {
+    width: 120px;
+    height: 120px;
+    font-family: 'Cardo', serif;
+    font-weight: 300;
+  }
+
+  /* El Botón Central Rykard */
+  .rykard-button {
+    width: 180px;
+    height: 180px;
+    font-family: 'Cardo', serif;
+    font-size: 1.5rem;
+    font-weight: 300;
+    font-style: italic;
+    letter-spacing: 5px;
+    text-shadow: 0 0 15px rgba(212, 175, 55, 0.7);
+    z-index: 5;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+  }
+</style>

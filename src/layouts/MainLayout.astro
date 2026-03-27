@@ -1,0 +1,40 @@
+kkkkk---
+// src/layouts/MainLayout.astro
+interface Props {
+  title: string;
+}
+
+const { title } = Astro.props;
+---
+
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="description" content="Rykard Portal" />
+    <meta name="viewport" content="width=device-width" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="generator" content={Astro.generator} />
+    <title>{title}</title>
+  </head>
+  <body>
+    <slot />
+  </body>
+</html>
+<style is:global>
+  @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital@1&family=Cardo&display=swap');
+
+  :root {
+    --gold: #d4af37;
+    --dark-wood: #0d0906; /* El tono de base de la madera */
+  }
+
+  html, body {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    height: 100%;
+    overflow: hidden; /* Mantenemos el portal estático */
+    background-color: #000; /* Fondo negro puro */
+  }
+</style>

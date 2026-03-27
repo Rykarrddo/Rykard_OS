@@ -1,0 +1,70 @@
+k---
+// Importamos el suavizado de scroll
+import SmoothScroll from '../components/SmoothScroll.jsx';
+
+interface Props {
+	title: string;
+}
+
+const { title } = Astro.props;
+---
+
+<!doctype html>
+<html lang="es">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="description" content="Portal de Filosofía y Ciencia" />
+		<meta name="viewport" content="width=device-width" />
+		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+		<title>{title}</title>
+		
+		<link rel="preconnect" href="https://fonts.googleapis.com">
+		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+		<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&family=Playfair+Display:ital,wght@0,700;1,700&display=swap" rel="stylesheet">
+	</head>
+	<body>
+		<SmoothScroll client:only="react" />
+		
+		<slot />
+	</body>
+</html>
+
+<style is:global>
+	:root {
+		--deep-teal: #0D6E6E;
+		--dark-mahogany: #1a0a0a;
+		--golden-amber: #DAA520;
+		--bg-black: #050505;
+	}
+
+	/* Configuración necesaria para Lenis (Smooth Scroll) */
+	html.lenis {
+	  height: auto;
+	}
+	.lenis.lenis-smooth {
+	  scroll-behavior: auto !important;
+	}
+	.lenis.lenis-smooth [data-lenis-prevent] {
+	  overscroll-behavior: contain;
+	}
+	.lenis.lenis-stopped {
+	  overflow: hidden;
+	}
+
+	html {
+		font-family: 'Inter', system-ui, sans-serif;
+		background: radial-gradient(circle at center, var(--dark-mahogany) 0%, var(--bg-black) 100%);
+		color: #e0e0e0;
+	}
+
+	body {
+		margin: 0;
+		padding: 0;
+		min-height: 100vh;
+	}
+
+	/* Estilos para títulos con la fuente Serif */
+	h1, h2, h3 {
+		font-family: 'Playfair Display', serif;
+	}
+</style>

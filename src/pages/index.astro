@@ -1,0 +1,181 @@
+---
+import MainLayout from '../layouts/MainLayout.astro';
+---
+
+<MainLayout title="Rykard_OS | Portal de Desintegración">
+  <main class="portal-root">
+    <div class="background-layer"></div>
+
+    <canvas id="particle-canvas"></canvas>
+    
+    <div class="scroll-container">
+      <div class="interface-overlay">
+        <section class="hero-text">
+          <span class="label">FEATURED</span>
+          <h1>ENTROPÍA Y METAFÍSICA</h1>
+          <p class="data-font">Sincronización de Códice Digital: remains.glb</p>
+        </section>
+      </div>
+    </div>
+  </main>
+</Layout>
+
+<script>
+  import * as THREE from 'three';
+  import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader';
+  import { gsap } from 'gsap';
+  import { ScrollTrigger } from 'gsap/ScrollTrigger';
+
+  gsap.registerPlugin(ScrollTrigger);
+
+  // 1. Configuración de la Escena
+  const canvas = document.querySelector('#particle-canvas');
+  const renderer = new THREE.WebGLRenderer({ 
+    canvas, 
+    antialias: true, 
+    alpha: true 
+  });
+  renderer.setSize(window.innerWidth, window.innerHeight);
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+
+  const scene = new THREE.Scene();
+  const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 100);
+  camera.position.z = 10; // Ajusta este valor si el modelo se ve muy cerca o lejos
+
+  // 2. Cargador del Modelo remains.glb
+  const loader = new GLTFLoader();
+
+  loader.load('/modelo.glb', (gltf) => {
+    // Buscamos la geometría del modelo
+    let geometry;
+    gltf.scene.traverse((child) => {
+      if (child.isMesh) {
+        geometry = child.geometry;
+      }
+    });
+
+    if (!geometry) return;
+
+    // Material de Partícula (Oro Técnico)
+    const material = new THREE.PointsMaterial({
+      color: 0xd4af37,
+      size: 0.012,
+      transparent: true,
+      opacity: 0.9,
+      blending: THREE.AdditiveBlending,
+      depthWrite: false
+    });
+
+    // Creamos el sistema de puntos
+    const points = new THREE.Points(geometry, material);
+    scene.add(points);
+
+    // Guardamos posiciones para la desintegración
+    const positions = geometry.attributes.position.array;
+    const count = positions.length;
+    const originalPositions = new Float32Array(positions);
+    const randomDirs = new Float32Array(count);
+
+    for(let i = 0; i < count; i++) {
+      randomDirs[i] = (Math.random() - 0.5) * 15; // Fuerza de la explosión
+    }
+
+    // 3. Motor de Scroll (GSAP)
+    ScrollTrigger.create({
+      trigger: ".scroll-container",
+      start: "top top",
+      end: "bottom bottom",
+      scrub: 1.5,
+      onUpdate: (self) => {
+        const progress = self.progress;
+        
+        for (let i = 0; i < count; i++) {
+          // La desintegración matemática
+          positions[i] = originalPositions[i] + (randomDirs[i] * progress);
+        }
+        geometry.attributes.position.needsUpdate = true;
+        
+        // Rotación elegante mientras se desintegra
+        points.rotation.y = progress * Math.PI;
+        points.rotation.z = progress * 0.5;
+      }
+    });
+  });
+
+  // 4. Bucle de Renderizado
+  function animate() {
+    requestAnimationFrame(animate);
+    renderer.render(scene, camera);
+  }
+  animate();
+
+  // Ajuste de Ventana
+  window.addEventListener('resize', () => {
+    camera.aspect = window.innerWidth / window.innerHeight;
+    camera.updateProjectionMatrix();
+    renderer.setSize(window.innerWidth, window.innerHeight);
+  });
+</script>
+
+<style>
+  .portal-root {
+    position: relative;
+    background-color: #000;
+    width: 100%;
+    overflow-x: hidden;
+  }
+
+  /* Fondo Hiperrealista (Aquí pondrás tu imagen después) */
+  .background-layer {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100vw; height: 100vh;
+    background-color: #0d0d0d;
+    background-image: 
+      radial-gradient(circle at 50% 30%, rgba(255, 255, 255, 0.05) 0%, transparent 60%),
+      repeating-conic-gradient(from 180deg at 50% 50%, #0d0d0d 0deg 2deg, #12100d 3deg 5deg);
+    background-size: cover;
+    z-index: 0;
+  }
+
+  #particle-canvas {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100vw; height: 100vh;
+    z-index: 1;
+    pointer-events: none;
+  }
+
+  .scroll-container {
+    position: relative;
+    height: 400vh; /* Altura para dar espacio al scroll */
+    z-index: 2;
+  }
+
+  .interface-overlay {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    pointer-events: none;
+    color: #d4af37;
+    text-shadow: 0 0 20px rgba(212, 175, 55, 0.4);
+  }
+
+  h1 { 
+    font-family: 'Playfair Display', serif;
+    font-size: 4rem; 
+    letter-spacing: 15px; 
+    margin: 20px 0;
+  }
+
+  .data-font { 
+    font-family: 'JetBrains Mono', monospace; 
+    font-size: 0.8rem; 
+    opacity: 0.6; 
+    letter-spacing: 2px;
+  }
+</style>
