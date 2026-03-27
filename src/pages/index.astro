@@ -45,7 +45,7 @@ import MainLayout from '../layouts/MainLayout.astro';
   // 2. Cargador del Modelo remains.glb
   const loader = new GLTFLoader();
 
-  loader.load('/modelo.glb', (gltf) => {
+  loader.load('/Remains.glb', (gltf) => {
     // Buscamos la geometría del modelo
     let geometry;
     gltf.scene.traverse((child) => {
