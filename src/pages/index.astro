@@ -1,190 +1,609 @@
 ---
-import MainLayout from '../layouts/MainLayout.astro';
+
+import '@fontsource/space-grotesk/300.css';
+
+import '@fontsource/inter/300.css';
+
 ---
 
-<MainLayout title="Rykard_OS | Portal de Desintegración">
-  <main class="portal-root">
-    <div class="background-layer"></div>
 
-    <canvas id="particle-canvas"></canvas>
-    
-    <div class="scroll-container">
-      <div class="interface-overlay">
-        <section class="hero-text">
-          <span class="label">FEATURED</span>
-          <h1>ENTROPÍA Y METAFÍSICA</h1>
-          <p class="data-font">Sincronización de Códice Digital: remains.glb</p>
-        </section>
-      </div>
-    </div>
-  </main>
-</Layout>
 
-<script>
-  import * as THREE from 'three';
-  import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader';
-  import { gsap } from 'gsap';
-  import { ScrollTrigger } from 'gsap/ScrollTrigger';
+<html lang="es">
 
-  gsap.registerPlugin(ScrollTrigger);
+<head>
 
-  // 1. Configuración de la Escena
-  const canvas = document.querySelector('#particle-canvas');
-  const renderer = new THREE.WebGLRenderer({ 
-    canvas, 
-    antialias: true, 
-    alpha: true 
-  });
-  renderer.setSize(window.innerWidth, window.innerHeight);
-  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    <meta charset="utf-8" />
 
-  const scene = new THREE.Scene();
-  const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 100);
-  camera.position.z = 10; // Ajusta este valor si el modelo se ve muy cerca o lejos
+    <title>RYKARD // ARCHIVE_OS</title>
 
-  // 2. Cargador del Modelo remains.glb
-  const loader = new GLTFLoader();
+    <style is:global>
 
-  loader.load('assets/Remains.glb', (gltf) => {
-    // Buscamos la geometría del modelo
-    let geometry;
-    gltf.scene.traverse((child) => {
-      if (child.isMesh) {
-        geometry = child.geometry;
-      }
-    });
+        :root {
 
-    if (!geometry) return;
+            --dark-bg: #030505;
 
-    // Material de Partícula (Oro Técnico)
-    const material = new THREE.PointsMaterial({
-      color: 0xd4af37,
-      size: 0.012,
-      transparent: true,
-      opacity: 0.9,
-      blending: THREE.AdditiveBlending,
-      depthWrite: false
-    });
+            --tech-green: #1aed9c;
 
-    // Creamos el sistema de puntos
-    const points = new THREE.Points(geometry, material);
-    scene.add(points);
+            --tech-glow: rgba(26, 237, 156, 0.4);
 
-    // Guardamos posiciones para la desintegración
-    const positions = geometry.attributes.position.array;
-    const count = positions.length;
-    const originalPositions = new Float32Array(positions);
-    const randomDirs = new Float32Array(count);
+            --antique-gold: #c5a059;
 
-    for(let i = 0; i < count; i++) {
-      randomDirs[i] = (Math.random() - 0.5) * 15; // Fuerza de la explosión
-    }
+            --gold-glow: rgba(197, 160, 89, 0.3);
 
-    // 3. Motor de Scroll (GSAP)
-    ScrollTrigger.create({
-      trigger: ".scroll-container",
-      start: "top top",
-      end: "bottom bottom",
-      scrub: 1.5,
-      onUpdate: (self) => {
-        const progress = self.progress;
-        
-        for (let i = 0; i < count; i++) {
-          // La desintegración matemática
-          positions[i] = originalPositions[i] + (randomDirs[i] * progress);
+            --font-main: 'Space Grotesk', sans-serif;
+
         }
-        geometry.attributes.position.needsUpdate = true;
+
+
+
+        html, body { margin: 0; padding: 0; background-color: var(--dark-bg); color: white; font-family: 'Inter', sans-serif; overflow-x: hidden; }
+
         
-        // Rotación elegante mientras se desintegra
-        points.rotation.y = progress * Math.PI;
-        points.rotation.z = progress * 0.5;
-      }
-    });
-  });
 
-  // 4. Bucle de Renderizado
-  function animate() {
-    requestAnimationFrame(animate);
-    renderer.render(scene, camera);
-  }
-  animate();
+        #vanta-background { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: 0; opacity: 0.3; }
 
-<<<<<<< HEAD
-  // Ajuste de Ventana
-  window.addEventListener('resize', () => {
-    camera.aspect = window.innerWidth / window.innerHeight;
-    camera.updateProjectionMatrix();
-    renderer.setSize(window.innerWidth, window.innerHeight);
-  });
-</script>
-=======
-        new GLTFLoader().load('/assets/Remains.glb', (gltf) => {
+        #canvas-container { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: 1; pointer-events: none; }
+
+        .film-grain { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: url('https://grainy-gradients.vercel.app/noise.svg'); opacity: 0.04; pointer-events: none; z-index: 5; }
+
+
+
+        .scroll-wrapper { position: relative; z-index: 2; width: 100%; }
+
+        
+
+        .hero-spacer { 
+
+            height: 160vh; 
+
+            display: flex; 
+
+            flex-direction: column; 
+
+            align-items: center; 
+
+            justify-content: flex-start; 
+
+            padding-top: 10vh; 
+
+            position: relative; 
+
+            /* Perspectiva clave para el efecto 3D */
+
+            perspective: 1200px;
+
+        }
+
+
+
+        .main-title {
+
+            font-family: var(--font-main); font-size: 0.8rem; letter-spacing: 25px; text-transform: uppercase; color: var(--antique-gold); text-align: center; border-bottom: 1px solid rgba(197, 160, 89, 0.1); padding-bottom: 25px;
+
+            text-shadow: 0 0 15px var(--gold-glow);
+
+            z-index: 10;
+
+        }
+
+
+
+        /* Contenedor magnético con soporte 3D */
+
+        .js-magnetic {
+
+            transform-style: preserve-3d;
+
+            will-change: transform;
+
+        }
+
+
+
+        .floating-card {
+
+            position: absolute;
+
+            width: 250px;
+
+            padding: 2.5rem 2rem;
+
+            background: linear-gradient(165deg, rgba(255,255,255,0.03) 0%, rgba(0,0,0,0.8) 100%);
+
+            backdrop-filter: blur(15px);
+
+            border: 1px solid rgba(197, 160, 89, 0.2);
+
+            border-radius: 4px;
+
+            box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+
+            font-family: var(--font-main);
+
+            pointer-events: all;
+
+        }
+
+
+
+        .floating-card.left { left: 5%; top: 35vh; }
+
+        .floating-card.right { right: 5%; top: 35vh; }
+
+
+
+        .fc-tag { font-size: 0.5rem; color: var(--tech-green); letter-spacing: 3px; text-transform: uppercase; margin-bottom: 1rem; display: block;}
+
+        .fc-title { font-size: 1rem; color: #fff; text-transform: uppercase; letter-spacing: 2px; margin: 0 0 1rem 0; font-weight: 300;}
+
+        .fc-body { font-family: 'Inter', sans-serif; font-size: 0.8rem; color: rgba(255,255,255,0.7); line-height: 1.6; margin: 0;}
+
+
+
+        .cards-container { position: relative; z-index: 3; padding: 0 8% 40vh 8%; perspective: 1500px; }
+
+        .cards-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 3rem; max-width: 1400px; margin: 0 auto; transform-style: preserve-3d; }
+
+
+
+        .tech-card {
+
+            background: linear-gradient(165deg, rgba(255,255,255,0.03) 0%, rgba(0,0,0,0.8) 100%);
+
+            backdrop-filter: blur(25px); -webkit-backdrop-filter: blur(25px);
+
+            border-top: 1px solid rgba(255, 255, 255, 0.1); 
+
+            border-left: 1px solid rgba(255, 255, 255, 0.1); 
+
+            border-right: 4px solid rgba(0, 0, 0, 0.5); 
+
+            border-bottom: 4px solid rgba(0, 0, 0, 0.5);
+
+            border-radius: 2px; padding: 4rem 2rem; min-height: 280px; 
+
+            display: flex; flex-direction: column; justify-content: center; align-items: center;
+
+            opacity: 0; transform: translateY(100px); 
+
+            transform-style: preserve-3d;
+
+            box-shadow: 20px 20px 50px rgba(0,0,0,0.8);
+
+            transition: border-color 0.4s ease, background 0.4s ease;
+
+        }
+
+
+
+        .tech-card:hover {
+
+            border-color: var(--tech-green);
+
+            background: rgba(26, 237, 156, 0.05);
+
+            box-shadow: 0 0 40px var(--tech-glow), 0 0 80px rgba(26, 237, 156, 0.1);
+
+        }
+
+
+
+        /* Capas internas para efecto Parallax dentro de la tarjeta */
+
+        .inner-content { transform-style: preserve-3d; pointer-events: none; }
+
+        .inner-content > * { transform: translateZ(30px); } /* El texto flota sobre la tarjeta */
+
+
+
+        .card-number { font-family: var(--font-main); font-size: 0.6rem; color: var(--antique-gold); letter-spacing: 5px; margin-bottom: 1.5rem; display: block; }
+
+        .card-title { font-family: var(--font-main); font-size: 1.2rem; text-transform: uppercase; letter-spacing: 3px; text-align: center; color: #fff; margin: 0; }
+
+    </style>
+
+</head>
+
+<body>
+
+
+
+    <div class="film-grain"></div>
+
+    <div id="vanta-background"></div>
+
+    <div id="canvas-container"></div>
+
+
+
+    <main class="scroll-wrapper">
+
+        <section class="hero-spacer">
+
+             <h1 class="main-title"> MEMENTO MORI // RYKARD_OS</h1>
+
+
+
+             <div class="floating-card left js-magnetic js-hero-card">
+
+                 <div class="inner-content">
+
+                    <span class="fc-tag">System_Status</span>
+
+                    <h3 class="fc-title">Core_Remains_Loaded</h3>
+
+                    <p class="fc-body">Visualizando estructura ósea indexada. Integridad del glTF: 100%. Render engine activo.</p>
+
+                 </div>
+
+             </div>
+
+
+
+             <div class="floating-card right js-magnetic js-hero-card">
+
+                 <div class="inner-content">
+
+                    <span class="fc-tag">Database_Nav</span>
+
+                    <h3 class="fc-title">Archive_Protocol_01</h3>
+
+                    <p class="fc-body">Haga scroll para desglosar categorías de datos. 9 nodos detectados en la red inferior.</p>
+
+                 </div>
+
+             </div>
+
+        </section>
+
+
+
+        <section class="cards-container">
+
+            <div class="cards-grid">
+
+                {[...Array(9)].map((_, i) => (
+
+                    <div class="tech-card js-magnetic js-tech-card">
+
+                        <div class="inner-content">
+
+                            <span class="card-number">NODE_V.0{i+1}</span>
+
+                            <h2 class="card-title">Categoría <br/> {i+1}</h2>
+
+                        </div>
+
+                    </div>
+
+                ))}
+
+            </div>
+
+        </section>
+
+    </main>
+
+
+
+    <script>
+
+        import * as THREE from 'three';
+
+        import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader';
+
+        import { gsap } from 'gsap';
+
+        import { ScrollTrigger } from 'gsap/ScrollTrigger';
+
+        import Lenis from '@studio-freight/lenis';
+
+        import NET from 'vanta/dist/vanta.net.min';
+
+
+
+        gsap.registerPlugin(ScrollTrigger);
+
+
+
+        const vantaEffect = NET({
+
+            el: "#vanta-background", THREE, color: 0x1aed9c, backgroundColor: 0x030505,
+
+            points: 10.0, maxDistance: 20.0, spacing: 15.0
+
+        });
+
+
+
+        const scene = new THREE.Scene();
+
+        const camera = new THREE.PerspectiveCamera(30, window.innerWidth/window.innerHeight, 0.1, 1000);
+
+        const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+
+        renderer.setSize(window.innerWidth, window.innerHeight);
+
+        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+
+        document.querySelector('#canvas-container').appendChild(renderer.domElement);
+
+
+
+        scene.add(new THREE.AmbientLight(0xffffff, 0.8));
+
+        const light = new THREE.DirectionalLight(0xffd700, 1.5);
+
+        light.position.set(5, 10, 7);
+
+        scene.add(light);
+
+
+
+        let modelGroup = new THREE.Group(); scene.add(modelGroup);
+
+
+
+        const camSetup = { orbitRadius: 20, orbitAngle: Math.PI * 0.2, camY: 1, modelOpacity: 1, modelY: -0.5, vantaDensity: 20.0 };
+
+
+
+        // --- PARTÍCULAS DE ORO ---
+
+        const flakeCount = 1500;
+
+        const flakeGeometry = new THREE.IcosahedronGeometry(0.04, 0); 
+
+        const goldMaterial = new THREE.MeshStandardMaterial({
+
+            color: 0xffd700, metalness: 0.5 , roughness: 0.7, emissive: 0x221100, transparent: true, opacity: 1
+
+        });
+
+        const goldInstancedMesh = new THREE.InstancedMesh(flakeGeometry, goldMaterial, flakeCount);
+
+        const dummy = new THREE.Object3D();
+
+        for (let i = 0; i < flakeCount; i++) {
+
+            dummy.position.set((Math.random()-0.5)*18, (Math.random()-0.5)*18, (Math.random()-0.5)*18);
+
+            dummy.rotation.set(Math.random()*Math.PI, Math.random()*Math.PI, Math.random()*Math.PI);
+
+            const s = Math.random()*0.8 + 0.2;
+
+            dummy.scale.set(s, s, s);
+
+            dummy.updateMatrix();
+
+            goldInstancedMesh.setMatrixAt(i, dummy.matrix);
+
+        }
+
+        scene.add(goldInstancedMesh);
+
+
+
+        const mouseLight = new THREE.PointLight(0xffd700, 45, 12); scene.add(mouseLight);
+
+        const mouse = new THREE.Vector2();
+
+        window.addEventListener('mousemove', (e) => {
+
+            mouse.x = (e.clientX / window.innerWidth) * 2 - 1;
+
+            mouse.y = -(e.clientY / window.innerHeight) * 2 + 1;
+
+        });
+
+
+
+        new GLTFLoader().load('./remains.glb', (gltf) => {
+
             const model = gltf.scene;
+
             const box = new THREE.Box3().setFromObject(model);
+
             model.position.sub(box.getCenter(new THREE.Vector3()));
+
             modelGroup.add(model);
+
             model.traverse(n => { if(n.isMesh) { n.material.transparent = true; n.material.opacity = 1; } });
->>>>>>> ac437db (Sincronizando nombres de archivos y rutas: Remains.glb)
 
-<style>
-  .portal-root {
-    position: relative;
-    background-color: #000;
-    width: 100%;
-    overflow-x: hidden;
-  }
 
-  /* Fondo Hiperrealista (Aquí pondrás tu imagen después) */
-  .background-layer {
-    position: fixed;
-    top: 0; left: 0;
-    width: 100vw; height: 100vh;
-    background-color: #0d0d0d;
-    background-image: 
-      radial-gradient(circle at 50% 30%, rgba(255, 255, 255, 0.05) 0%, transparent 60%),
-      repeating-conic-gradient(from 180deg at 50% 50%, #0d0d0d 0deg 2deg, #12100d 3deg 5deg);
-    background-size: cover;
-    z-index: 0;
-  }
 
-  #particle-canvas {
-    position: fixed;
-    top: 0; left: 0;
-    width: 100vw; height: 100vh;
-    z-index: 1;
-    pointer-events: none;
-  }
+            gsap.to(camSetup, {
 
-  .scroll-container {
-    position: relative;
-    height: 400vh; /* Altura para dar espacio al scroll */
-    z-index: 2;
-  }
+                orbitAngle: Math.PI * 2.7, orbitRadius: 4, vantaDensity: 30.0,
 
-  .interface-overlay {
-    position: fixed;
-    top: 0; left: 0;
-    width: 100%; height: 100vh;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    pointer-events: none;
-    color: #d4af37;
-    text-shadow: 0 0 20px rgba(212, 175, 55, 0.4);
-  }
+                scrollTrigger: { trigger: ".hero-spacer", start: "top top", end: "bottom center", scrub: 1.9}
 
-  h1 { 
-    font-family: 'Playfair Display', serif;
-    font-size: 4rem; 
-    letter-spacing: 15px; 
-    margin: 20px 0;
-  }
+            });
 
-  .data-font { 
-    font-family: 'JetBrains Mono', monospace; 
-    font-size: 0.8rem; 
-    opacity: 0.6; 
-    letter-spacing: 2px;
-  }
-</style>
+
+
+            const tlExit = gsap.timeline({
+
+                scrollTrigger: { trigger: ".cards-grid", start: "top 95%", end: "top 40%", scrub: 1.2 }
+
+            });
+
+            tlExit.to(camSetup, { modelY: 10, camY: 25, modelOpacity: 0 }, 0);
+
+            tlExit.to(".js-hero-card", { z: 500, opacity: 0, stagger: 0.1 }, 0);
+
+        });
+
+
+
+        // --- LÓGICA DE MAGNETISMO 3D (EJE Z) ---
+
+        const cards = document.querySelectorAll('.js-magnetic');
+
+
+
+        cards.forEach(card => {
+
+            card.addEventListener('mousemove', (e) => {
+
+                const rect = card.getBoundingClientRect();
+
+                const centerX = rect.left + rect.width / 2;
+
+                const centerY = rect.top + rect.height / 2;
+
+                
+
+                // Distancia desde el centro (normalizada de -1 a 1)
+
+                const percentX = (e.clientX - centerX) / (rect.width / 2);
+
+                const percentY = (e.clientY - centerY) / (rect.height / 2);
+
+
+
+                gsap.to(card, {
+
+                    duration: 0.5,
+
+                    x: percentX * 30, // Movimiento lateral
+
+                    y: percentY * 30, // Movimiento vertical
+
+                    z: 80,            // SALTO HACIA ADELANTE (Rompe la 4ta pared)
+
+                    rotateY: percentX * 25, // Inclinación lateral
+
+                    rotateX: -percentY * 25, // Inclinación frontal/trasera
+
+                    ease: "power2.out",
+
+                    overwrite: true
+
+                });
+
+
+
+                // Efecto parallax para el contenido interno
+
+                gsap.to(card.querySelector('.inner-content'), {
+
+                    duration: 0.5,
+
+                    x: percentX * 10,
+
+                    y: percentY * 10,
+
+                    z: 40,
+
+                    ease: "power2.out"
+
+                });
+
+            });
+
+
+
+            card.addEventListener('mouseleave', () => {
+
+                gsap.to(card, {
+
+                    duration: 1.2,
+
+                    x: 0, y: 0, z: 0,
+
+                    rotateX: 0, rotateY: 0,
+
+                    ease: "elastic.out(1, 0.4)"
+
+                });
+
+                gsap.to(card.querySelector('.inner-content'), {
+
+                    duration: 1.2, x: 0, y: 0, z: 0,
+
+                    ease: "elastic.out(1, 0.4)"
+
+                });
+
+            });
+
+        });
+
+
+
+        // Animación de entrada para el grid
+
+        gsap.to(".js-tech-card", {
+
+            opacity: 1, y: 0, stagger: 0.05, duration: 1.5, ease: "power4.out",
+
+            scrollTrigger: { trigger: ".cards-grid", start: "top 90%" }
+
+        });
+
+
+
+        const lenis = new Lenis({ duration: 1.5 });
+
+        function animate(time) {
+
+            lenis.raf(time);
+
+            camera.position.x = Math.cos(camSetup.orbitAngle) * camSetup.orbitRadius;
+
+            camera.position.z = Math.sin(camSetup.orbitAngle) * camSetup.orbitRadius;
+
+            camera.position.y = camSetup.camY + (Math.sin(time/2500) * 0.25);
+
+            camera.lookAt(0, camSetup.modelY, 0);
+
+
+
+            const vector = new THREE.Vector3(mouse.x, mouse.y, 0.5);
+
+            vector.unproject(camera);
+
+            const dir = vector.sub(camera.position).normalize();
+
+            const distance = -camera.position.z / dir.z;
+
+            const pos = camera.position.clone().add(dir.multiplyScalar(distance));
+
+            mouseLight.position.copy(pos);
+
+
+
+            goldInstancedMesh.rotation.y += 0.0006;
+
+            goldInstancedMesh.position.y = camSetup.modelY;
+
+            goldMaterial.opacity = camSetup.modelOpacity; 
+
+            modelGroup.position.y = camSetup.modelY;
+
+            modelGroup.traverse(n => { if(n.isMesh) n.material.opacity = camSetup.modelOpacity; });
+
+
+
+            renderer.render(scene, camera);
+
+            requestAnimationFrame(animate);
+
+        }
+
+        requestAnimationFrame(animate);
+
+
+
+        window.addEventListener('resize', () => {
+
+            camera.aspect = window.innerWidth / window.innerHeight; camera.updateProjectionMatrix(); renderer.setSize(window.innerWidth, window.innerHeight);
+
+        });
+
+    </script>
+
+</body>
+
+</html>
